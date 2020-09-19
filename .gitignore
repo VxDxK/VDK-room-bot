@@ -8,4 +8,5 @@
 *.rar
 *.class
 *.iml
-
+*.lst
+/target/maven-archiver/pom.properties
