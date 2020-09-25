@@ -60,6 +60,11 @@
             <artifactId>JDA</artifactId>
             <version>4.2.0_187</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.1</version>
+        </dependency>
     </dependencies>
 
 
