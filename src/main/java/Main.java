@@ -1,15 +1,20 @@
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import javax.security.auth.login.LoginException;
 
 public class Main {
-    //private static String token = "NzUxMTg0MjU3NDg5MTc0NjI4.X1FY2w.lqL9Q0gnUuJXUVjWKAuaEPkAQiE";
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         if(args.length == 0 ){
             return;
         }
-        JDA jda = JDABuilder.createDefault(args[0])
-                .addEventListeners(new NewRooms())
-                .build();
+        try {
+            JDA jda = JDABuilder.createDefault(args[0])
+                    .addEventListeners(new NewRooms())
+                    .build();
+        }catch (LoginException e){
+            System.out.print("JDA build fail");
+            e.printStackTrace();
+        }
 
     }
 }

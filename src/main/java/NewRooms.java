@@ -3,29 +3,27 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
+import net.dv8tion.jda.api.events.channel.voice.VoiceChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Objects;
-
 public class NewRooms extends ListenerAdapter {
-    private final HashMap<Member, VoiceChannel> MemberAndVoice = new HashMap<>();
     private final BidiMap<String, String> MemberTextID = new DualHashBidiMap<>();
-
-
+    private final BidiMap<String, String> MemberVoiceID = new DualHashBidiMap<>();
 
     @Override
     public void onGuildVoiceJoin(@NotNull GuildVoiceJoinEvent event) {
 
         if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room")){
-           MemberAndVoice.put(event.getMember(), createVoiceChannel(event.getMember()));
+           MemberVoiceID.put(event.getMember().getUser().getId(), createVoiceChannel(event.getMember()).getId());
         }else if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Text Room")){
             if (!MemberTextID.containsKey(event.getMember().getUser().getId())){
                 MemberTextID.put(event.getMember().getUser().getId(), createTextChannel(event.getMember()).getId());
@@ -35,12 +33,11 @@ public class NewRooms extends ListenerAdapter {
 
 
     }
-
     @Override
     public void onGuildVoiceLeave(@NotNull GuildVoiceLeaveEvent event) {
-        if(MemberAndVoice.containsKey(event.getMember()) && MemberAndVoice.get(event.getMember()).equals(event.getChannelLeft())){
-            event.getChannelLeft().delete().queue();
-            MemberAndVoice.remove(event.getMember(), event.getChannelLeft());
+        if(MemberVoiceID.containsKey(event.getMember().getUser().getId()) && MemberVoiceID.get(event.getMember().getUser().getId()).equals(event.getChannelLeft().getId())){
+            event.getChannelLeft().delete().submit();
+            MemberVoiceID.remove(event.getMember().getUser().getId());
         }
 
 
@@ -56,17 +53,17 @@ public class NewRooms extends ListenerAdapter {
             event.getGuild().moveVoiceMember(event.getMember(), event.getChannelLeft()).queue();
 
         }else if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room")){
-            if(!MemberAndVoice.containsKey(event.getMember())){
-                MemberAndVoice.put(event.getMember(), createVoiceChannel(event.getMember()));
+            if(!MemberVoiceID.containsKey(event.getMember().getUser().getId())){
+                MemberVoiceID.put(event.getMember().getUser().getId(), createVoiceChannel(event.getMember()).getId());
                 return;
             }
 
             event.getGuild().moveVoiceMember(event.getMember(), event.getChannelLeft()).queue();
 
         }else {
-            if(MemberAndVoice.containsKey(event.getMember()) && MemberAndVoice.get(event.getMember()).equals(event.getChannelLeft())){
+            if(MemberVoiceID.containsKey(event.getMember().getUser().getId()) && MemberVoiceID.get(event.getMember().getUser().getId()).equals(event.getChannelLeft().getId())){
                 event.getChannelLeft().delete().queue();
-                MemberAndVoice.remove(event.getMember(), event.getChannelLeft());
+                MemberVoiceID.remove(event.getMember().getUser().getId(), event.getChannelLeft().getId());
             }
         }
     }
@@ -93,7 +90,7 @@ public class NewRooms extends ListenerAdapter {
             }
 
         }else if(event.getMessage().getContentDisplay().trim().toLowerCase().startsWith("/hash size")){
-            event.getChannel().sendMessage("Voice hash size: " + MemberAndVoice.size() +
+            event.getChannel().sendMessage("Voice hash size: " + MemberVoiceID.size() +
                     "\n"
                     +                            "Text hash size: " + MemberTextID.size()).queue();
         }
