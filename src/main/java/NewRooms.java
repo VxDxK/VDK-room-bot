@@ -3,7 +3,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
-import net.dv8tion.jda.api.events.channel.voice.VoiceChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
@@ -17,13 +16,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 public class NewRooms extends ListenerAdapter {
     private final BidiMap<String, String> MemberTextID = new DualHashBidiMap<>();
-    private final BidiMap<String, String> MemberVoiceID = new DualHashBidiMap<>();
+    private final BidiMap<String, VoiceRoom> MemberVoiceID = new DualHashBidiMap<>();
 
     @Override
     public void onGuildVoiceJoin(@NotNull GuildVoiceJoinEvent event) {
 
         if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room")){
-           MemberVoiceID.put(event.getMember().getUser().getId(), createVoiceChannel(event.getMember()).getId());
+           MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
         }else if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Text Room")){
             if (!MemberTextID.containsKey(event.getMember().getUser().getId())){
                 MemberTextID.put(event.getMember().getUser().getId(), createTextChannel(event.getMember()).getId());
@@ -35,7 +34,8 @@ public class NewRooms extends ListenerAdapter {
     }
     @Override
     public void onGuildVoiceLeave(@NotNull GuildVoiceLeaveEvent event) {
-        if(MemberVoiceID.containsKey(event.getMember().getUser().getId()) && MemberVoiceID.get(event.getMember().getUser().getId()).equals(event.getChannelLeft().getId())){
+        String key = event.getMember().getUser().getId();
+        if(MemberVoiceID.containsKey(key) && MemberVoiceID.get(key).equals(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()))){
             event.getChannelLeft().delete().submit();
             MemberVoiceID.remove(event.getMember().getUser().getId());
         }
@@ -54,16 +54,16 @@ public class NewRooms extends ListenerAdapter {
 
         }else if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room")){
             if(!MemberVoiceID.containsKey(event.getMember().getUser().getId())){
-                MemberVoiceID.put(event.getMember().getUser().getId(), createVoiceChannel(event.getMember()).getId());
+                MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
                 return;
             }
 
             event.getGuild().moveVoiceMember(event.getMember(), event.getChannelLeft()).queue();
 
         }else {
-            if(MemberVoiceID.containsKey(event.getMember().getUser().getId()) && MemberVoiceID.get(event.getMember().getUser().getId()).equals(event.getChannelLeft().getId())){
+            if(MemberVoiceID.containsKey(event.getMember().getUser().getId()) && MemberVoiceID.get(event.getMember().getUser().getId()).equals(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()))){
                 event.getChannelLeft().delete().queue();
-                MemberVoiceID.remove(event.getMember().getUser().getId(), event.getChannelLeft().getId());
+                MemberVoiceID.remove(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()));
             }
         }
     }
@@ -73,8 +73,8 @@ public class NewRooms extends ListenerAdapter {
         if(event.getAuthor().isBot()){
             return;
         }
-
-        if(event.getMessage().getContentDisplay().equals("/del")){
+        String MessageContent = event.getMessage().getContentDisplay();
+        if(MessageContent.equals("/del")){
             try {
                 if(MemberTextID.containsKey(Objects.requireNonNull(event.getMember()).getUser().getId()) ||
                         event.getMember().isOwner() ||
@@ -89,10 +89,18 @@ public class NewRooms extends ListenerAdapter {
                 e.printStackTrace();
             }
 
-        }else if(event.getMessage().getContentDisplay().trim().toLowerCase().startsWith("/hash size")){
+        }else if(MessageContent.trim().toLowerCase().startsWith("/hash size")){
             event.getChannel().sendMessage("Voice hash size: " + MemberVoiceID.size() +
                     "\n"
                     +                            "Text hash size: " + MemberTextID.size()).queue();
+        }else if(MessageContent.trim().toLowerCase().startsWith("/lock")
+                && MemberVoiceID.containsKey(Objects.requireNonNull(event.getMember()).getId())
+                && MemberVoiceID.get(event.getMember().getId()).getGuildID().equals(event.getGuild().getId())){
+
+        }else if(MessageContent.trim().toLowerCase().startsWith("/unlock")
+                && MemberVoiceID.containsKey(Objects.requireNonNull(event.getMember()).getId())
+                && MemberVoiceID.get(event.getMember().getId()).getGuildID().equals(event.getGuild().getId())){
+
         }
     }
 

@@ -29,6 +29,14 @@ public class VoiceRoom {
     public boolean isLocked() {
         return locked;
     }
+    public void Lock(){
+        locked = true;
+    }
+    public void Unlock(){
+        locked = false;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {

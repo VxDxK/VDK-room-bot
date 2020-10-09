@@ -1,7 +1,10 @@
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.PrivateChannel;
+
 import javax.security.auth.login.LoginException;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Main {
     public static void main(String[] args) {
@@ -11,10 +14,13 @@ public class Main {
         try {
             JDA jda = JDABuilder.createDefault(args[0])
                     .addEventListeners(new NewRooms())
-                    .build();
-            System.out.println("Bot started at: " + LocalDateTime.now().toString());
+                    .build().awaitReady();
 
-        }catch (LoginException e){
+            System.out.println("Bot started at: " + LocalDateTime.now().toString().replace('T', ' '));
+            PrivateChannel channel = jda.openPrivateChannelById("320925451918770177").complete();
+            channel.sendMessage("Restart").queue();
+
+        }catch (LoginException | InterruptedException e){
             System.out.print("JDA build fail");
             e.printStackTrace();
         }
