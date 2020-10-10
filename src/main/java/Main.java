@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.entities.PrivateChannel;
 
 import javax.security.auth.login.LoginException;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 public class Main {
     public static void main(String[] args) {

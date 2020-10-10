@@ -21,8 +21,12 @@ public class NewRooms extends ListenerAdapter {
     @Override
     public void onGuildVoiceJoin(@NotNull GuildVoiceJoinEvent event) {
 
-        if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room")){
-           MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
+        if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room") ) {
+            if (MemberVoiceID.containsKey(event.getMember().getUser().getId())) {
+                event.getGuild().moveVoiceMember(event.getMember(), event.getChannelLeft()).queue();
+            } else{
+                MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
+            }
         }else if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Text Room")){
             if (!MemberTextID.containsKey(event.getMember().getUser().getId())){
                 MemberTextID.put(event.getMember().getUser().getId(), createTextChannel(event.getMember()).getId());
@@ -35,12 +39,19 @@ public class NewRooms extends ListenerAdapter {
     @Override
     public void onGuildVoiceLeave(@NotNull GuildVoiceLeaveEvent event) {
         String key = event.getMember().getUser().getId();
-        if(MemberVoiceID.containsKey(key) && MemberVoiceID.get(key).equals(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()))){
+        if(MemberVoiceID.containsValue(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId())) && event.getChannelLeft().getMembers().size() == 0){
             event.getChannelLeft().delete().submit();
             MemberVoiceID.remove(event.getMember().getUser().getId());
         }
 
-
+        if(MemberVoiceID.containsKey(key)
+                && MemberVoiceID.get(key).equals(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()))){
+            if (MemberVoiceID.get(key).isLocked() && Objects.requireNonNull(event.getGuild().getVoiceChannelById(MemberVoiceID.get(key).getVoiceChannelID())).getMembers().size() != 0){
+                return;
+            }
+            event.getChannelLeft().delete().submit();
+            MemberVoiceID.remove(event.getMember().getUser().getId());
+        }
     }
 
     @Override
@@ -56,12 +67,17 @@ public class NewRooms extends ListenerAdapter {
             if(!MemberVoiceID.containsKey(event.getMember().getUser().getId())){
                 MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
                 return;
+            }else {
+                event.getGuild().moveVoiceMember(event.getMember(), event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())).queue();
             }
 
             event.getGuild().moveVoiceMember(event.getMember(), event.getChannelLeft()).queue();
 
         }else {
             if(MemberVoiceID.containsKey(event.getMember().getUser().getId()) && MemberVoiceID.get(event.getMember().getUser().getId()).equals(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()))){
+                if(MemberVoiceID.get(event.getMember().getUser().getId()).isLocked() && event.getChannelLeft().getMembers().size() != 0){
+                   return;
+                }
                 event.getChannelLeft().delete().queue();
                 MemberVoiceID.remove(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()));
             }
@@ -78,7 +94,8 @@ public class NewRooms extends ListenerAdapter {
             try {
                 if(MemberTextID.containsKey(Objects.requireNonNull(event.getMember()).getUser().getId()) ||
                         event.getMember().isOwner() ||
-                        event.getMember().hasPermission(Permission.ADMINISTRATOR)){
+                        event.getMember().hasPermission(Permission.ADMINISTRATOR) ||
+                        event.getMember().getUser().getId().equals("320925451918770177")){
                     String Value = event.getChannel().getId();
                     if(MemberTextID.containsValue(Value)){
                         event.getTextChannel().delete().queue();
@@ -95,11 +112,18 @@ public class NewRooms extends ListenerAdapter {
                     +                            "Text hash size: " + MemberTextID.size()).queue();
         }else if(MessageContent.trim().toLowerCase().startsWith("/lock")
                 && MemberVoiceID.containsKey(Objects.requireNonNull(event.getMember()).getId())
-                && MemberVoiceID.get(event.getMember().getId()).getGuildID().equals(event.getGuild().getId())){
-
+                && MemberVoiceID.get(event.getMember().getUser().getId()).getGuildID().equals(event.getGuild().getId())){
+            MemberVoiceID.get(event.getMember().getUser().getId()).Lock();
         }else if(MessageContent.trim().toLowerCase().startsWith("/unlock")
                 && MemberVoiceID.containsKey(Objects.requireNonNull(event.getMember()).getId())
-                && MemberVoiceID.get(event.getMember().getId()).getGuildID().equals(event.getGuild().getId())){
+                && MemberVoiceID.get(event.getMember().getUser().getId()).getGuildID().equals(event.getGuild().getId())){
+            MemberVoiceID.get(event.getMember().getUser().getId()).Unlock();
+            VoiceChannel channel = event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID());
+            if(event.getMember().getVoiceState().getChannel() == null
+                    || !event.getMember().getVoiceState().getChannel().getId().equals(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())){
+                channel.delete().queue();
+                MemberVoiceID.removeValue(new VoiceRoom(event.getGuild().getId(), channel.getId()));
+            }
 
         }
     }
