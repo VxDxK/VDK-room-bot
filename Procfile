@@ -1,1 +1,0 @@
-worker: java -jar target/NewRoomBot-1.1-SNAPSHOT-jar-with-dependencies.jar NzUxMTg0MjU3NDg5MTc0NjI4.X1FY2w.DGJnrBb2rsEklbCOfyt1TPYjjmE
