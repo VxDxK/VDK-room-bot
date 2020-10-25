@@ -1,5 +1,6 @@
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
@@ -23,7 +24,7 @@ public class NewRooms extends ListenerAdapter {
 
         if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room") ) {
             if (MemberVoiceID.containsKey(event.getMember().getUser().getId())) {
-                event.getGuild().moveVoiceMember(event.getMember(), event.getChannelLeft()).queue();
+                event.getGuild().moveVoiceMember(event.getMember(), event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())).queue();
             } else{
                 MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
             }
@@ -41,7 +42,7 @@ public class NewRooms extends ListenerAdapter {
         String key = event.getMember().getUser().getId();
         if(MemberVoiceID.containsValue(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId())) && event.getChannelLeft().getMembers().size() == 0){
             event.getChannelLeft().delete().submit();
-            MemberVoiceID.remove(event.getMember().getUser().getId());
+            MemberVoiceID.removeValue(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()));
         }
 
         if(MemberVoiceID.containsKey(key)
@@ -50,7 +51,7 @@ public class NewRooms extends ListenerAdapter {
                 return;
             }
             event.getChannelLeft().delete().submit();
-            MemberVoiceID.remove(event.getMember().getUser().getId());
+            MemberVoiceID.removeValue(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()));
         }
     }
 
@@ -71,15 +72,17 @@ public class NewRooms extends ListenerAdapter {
                 event.getGuild().moveVoiceMember(event.getMember(), event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())).queue();
             }
 
-            event.getGuild().moveVoiceMember(event.getMember(), event.getChannelLeft()).queue();
-
         }else {
             if(MemberVoiceID.containsKey(event.getMember().getUser().getId()) && MemberVoiceID.get(event.getMember().getUser().getId()).equals(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()))){
                 if(MemberVoiceID.get(event.getMember().getUser().getId()).isLocked() && event.getChannelLeft().getMembers().size() != 0){
                    return;
                 }
                 event.getChannelLeft().delete().queue();
-                MemberVoiceID.remove(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()));
+                MemberVoiceID.removeValue(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()));
+            }else if(MemberVoiceID.containsValue(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId())) && event.getChannelLeft().getMembers().size() == 0){
+                System.out.println("тут");
+                event.getChannelLeft().delete().queue();
+                MemberVoiceID.removeValue(new VoiceRoom(event.getGuild().getId(), event.getChannelLeft().getId()));
             }
         }
     }
@@ -113,10 +116,14 @@ public class NewRooms extends ListenerAdapter {
         }else if(MessageContent.trim().toLowerCase().startsWith("/lock")
                 && MemberVoiceID.containsKey(Objects.requireNonNull(event.getMember()).getId())
                 && MemberVoiceID.get(event.getMember().getUser().getId()).getGuildID().equals(event.getGuild().getId())){
+            PrivateChannel cchannel = event.getJDA().openPrivateChannelById(event.getMember().getUser().getId()).complete();
+            cchannel.sendMessage("Locked").queue();
             MemberVoiceID.get(event.getMember().getUser().getId()).Lock();
         }else if(MessageContent.trim().toLowerCase().startsWith("/unlock")
                 && MemberVoiceID.containsKey(Objects.requireNonNull(event.getMember()).getId())
                 && MemberVoiceID.get(event.getMember().getUser().getId()).getGuildID().equals(event.getGuild().getId())){
+            PrivateChannel cchannel = event.getJDA().openPrivateChannelById(event.getMember().getUser().getId()).complete();
+            cchannel.sendMessage("Unlocked").queue();
             MemberVoiceID.get(event.getMember().getUser().getId()).Unlock();
             VoiceChannel channel = event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID());
             if(event.getMember().getVoiceState().getChannel() == null
