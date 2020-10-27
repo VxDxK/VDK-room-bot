@@ -12,7 +12,7 @@ public class Main {
         }
         try {
             JDA jda = JDABuilder.createDefault(args[0])
-                    .addEventListeners(new NewRooms())
+                    .addEventListeners(new RoomManager())
                     .build().awaitReady();
 
             System.out.println("Bot started at: " + LocalDateTime.now().toString().replace('T', ' '));

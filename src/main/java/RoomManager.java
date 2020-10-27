@@ -15,7 +15,7 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-public class NewRooms extends ListenerAdapter {
+public class RoomManager extends ListenerAdapter {
     private final BidiMap<String, String> MemberTextID = new DualHashBidiMap<>();
     private final BidiMap<String, VoiceRoom> MemberVoiceID = new DualHashBidiMap<>();
 
@@ -67,7 +67,6 @@ public class NewRooms extends ListenerAdapter {
         }else if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room")){
             if(!MemberVoiceID.containsKey(event.getMember().getUser().getId())){
                 MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
-                return;
             }else {
                 event.getGuild().moveVoiceMember(event.getMember(), event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())).queue();
             }
@@ -126,8 +125,8 @@ public class NewRooms extends ListenerAdapter {
             cchannel.sendMessage("Unlocked").queue();
             MemberVoiceID.get(event.getMember().getUser().getId()).Unlock();
             VoiceChannel channel = event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID());
-            if(event.getMember().getVoiceState().getChannel() == null
-                    || !event.getMember().getVoiceState().getChannel().getId().equals(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())){
+            if(Objects.requireNonNull(event.getMember().getVoiceState()).getChannel() == null
+                    || !Objects.requireNonNull(event.getMember().getVoiceState().getChannel()).getId().equals(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())){
                 channel.delete().queue();
                 MemberVoiceID.removeValue(new VoiceRoom(event.getGuild().getId(), channel.getId()));
             }
@@ -148,6 +147,9 @@ public class NewRooms extends ListenerAdapter {
         .setParent( Objects.requireNonNull(Objects.requireNonNull(member.getVoiceState()).getChannel()).getParent())
         .complete();
          member.getGuild().moveVoiceMember(member, ch).queue();
+
+         PrivateChannel channel = member.getJDA().openPrivateChannelById(member.getUser().getId()).complete();
+         channel.sendMessage("Hey, you created voice channel\nYou can lock it, by typing \"***/lock***\" in chat of your server.\nAnd unlock using\"***/unlock***\".").queue();
          return ch;
     }
 

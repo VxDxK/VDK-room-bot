@@ -18,6 +18,10 @@ public class VoiceRoom {
         this(guild.getId(), channel.getId());
     }
 
+    public VoiceRoom(VoiceChannel channel) {
+        this(channel.getGuild(), channel);
+    }
+
     public String getGuildID() {
         return GuildID;
     }
