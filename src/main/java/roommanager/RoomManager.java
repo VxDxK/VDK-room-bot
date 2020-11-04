@@ -1,3 +1,5 @@
+package roommanager;
+
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.PrivateChannel;
@@ -26,7 +28,8 @@ public class RoomManager extends ListenerAdapter {
             if (MemberVoiceID.containsKey(event.getMember().getUser().getId())) {
                 event.getGuild().moveVoiceMember(event.getMember(), event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())).queue();
             } else{
-                MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
+                MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId(), true));
+
             }
         }else if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Text Room")){
             if (!MemberTextID.containsKey(event.getMember().getUser().getId())){
@@ -66,7 +69,7 @@ public class RoomManager extends ListenerAdapter {
 
         }else if(event.getChannelJoined().getName().equalsIgnoreCase("[+] New Voice Room")){
             if(!MemberVoiceID.containsKey(event.getMember().getUser().getId())){
-                MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId()));
+                MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId(), true));
             }else {
                 event.getGuild().moveVoiceMember(event.getMember(), event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())).queue();
             }
@@ -149,7 +152,7 @@ public class RoomManager extends ListenerAdapter {
          member.getGuild().moveVoiceMember(member, ch).queue();
 
          PrivateChannel channel = member.getJDA().openPrivateChannelById(member.getUser().getId()).complete();
-         channel.sendMessage("Hey, you created voice channel\nYou can lock it, by typing \"***/lock***\" in chat of your server.\nAnd unlock using\"***/unlock***\".").queue();
+         channel.sendMessage("Hey, you created voice channel\nYou can unlock it, by typing \"***/unlock***\" in chat of your server.\nAnd lock using\"***/lock***\".").queue();
          return ch;
     }
 
@@ -161,6 +164,7 @@ public class RoomManager extends ListenerAdapter {
         ch.sendMessage("Hi "+ member.getAsMention() + "\nYou can delete this channel using \"***/del***\" in chat. Admins also can delete your chat room.").queue();
         return ch;
     }
+
 
 
 

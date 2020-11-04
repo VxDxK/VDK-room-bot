@@ -1,3 +1,5 @@
+package roommanager;
+
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
@@ -21,6 +23,22 @@ public class VoiceRoom {
     public VoiceRoom(VoiceChannel channel) {
         this(channel.getGuild(), channel);
     }
+    public VoiceRoom(VoiceChannel channel, boolean lock) {
+        this(channel.getGuild(), channel);
+        this.locked = lock;
+    }
+
+    public VoiceRoom(String GuildID, String VoiceChannelID, boolean lock) {
+        this.GuildID = GuildID;
+        this.VoiceChannelID = VoiceChannelID;
+        this.locked = lock;
+    }
+
+    public VoiceRoom(Guild guild, VoiceChannel channel, boolean lock){
+        this(guild.getId(), channel.getId(), lock);
+    }
+
+
 
     public String getGuildID() {
         return GuildID;
@@ -39,7 +57,9 @@ public class VoiceRoom {
     public void Unlock(){
         locked = false;
     }
-
+    public void changeLockState(){
+        locked = !locked;
+    }
 
 
     @Override
