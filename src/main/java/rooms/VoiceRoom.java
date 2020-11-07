@@ -1,4 +1,4 @@
-package roommanager;
+package rooms;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.VoiceChannel;

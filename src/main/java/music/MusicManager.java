@@ -1,5 +1,6 @@
-package musicmanager;
+package music;
 
+import com.google.api.services.youtube.YouTube;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -36,7 +37,13 @@ public class MusicManager extends ListenerAdapter {
         String msg = event.getMessage().getContentDisplay().trim();
         String[] array = msg.split(" ");
         if(array[0].toLowerCase().startsWith(COMMAND_PREFIX + "play") && array.length >= 2){
-            loadAndPlay(event.getChannel(), array[1]);
+            if(array[1].startsWith("https://") || array[1].startsWith("http://")){
+                loadAndPlay(event.getChannel(), array[1]);
+            }else {
+                System.out.println("not a link");
+
+            }
+
         }else if(array[0].startsWith(COMMAND_PREFIX + "skip")){
             skip(event.getChannel());
         }

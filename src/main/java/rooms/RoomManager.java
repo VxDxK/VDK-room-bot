@@ -1,4 +1,4 @@
-package roommanager;
+package rooms;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
