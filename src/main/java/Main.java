@@ -35,7 +35,7 @@ public class Main {
             if(stream != null){
                 JSONParser parser = new JSONParser();
                 BotData = (JSONObject) parser.parse(IOUtils.toString(stream, StandardCharsets.UTF_8));
-                builder.addEventListeners(new SwitchAdapter(BotData));
+                //builder.addEventListeners(new SwitchAdapter(BotData));
             }else{
                 System.out.println("BotData.json failed to find");
             }
@@ -43,7 +43,6 @@ public class Main {
 
 
             JDA jda = builder.build().awaitReady();
-
             
 
             System.out.println("Bot started at: " + LocalDateTime.now().toString().replace('T', ' '));

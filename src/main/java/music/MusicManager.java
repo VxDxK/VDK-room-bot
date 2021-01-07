@@ -46,6 +46,8 @@ public class MusicManager extends ListenerAdapter {
 
         }else if(array[0].startsWith(COMMAND_PREFIX + "skip")){
             skip(event.getChannel());
+        }else if(array[0].startsWith(COMMAND_PREFIX + "delall")){
+            musicManagers.clear();
         }
     }
 

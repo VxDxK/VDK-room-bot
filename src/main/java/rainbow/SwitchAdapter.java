@@ -10,12 +10,11 @@ import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
+import java.awt.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
-public class SwitchAdapter extends ListenerAdapter {
+public class SwitchAdapter extends ListenerAdapter{
     HashSet<String> ProUserID = new HashSet<>();
     Switcher switcher;
 
@@ -38,14 +37,25 @@ public class SwitchAdapter extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-        String message = event.getMessage().getContentDisplay();
+        String MessageSTR = event.getMessage().getContentDisplay();
         String UserId = event.getAuthor().getId();
 
-        if(ProUserID.contains(UserId) && event.getMessage().getContentDisplay().startsWith("/start-th") &&  switcher.isAlive()){
+        //RoleImpl s = new RoleImpl(event.getJDA().getRoleById("774678337964343296").getIdLong(), event.getGuild());
+
+        if(ProUserID.contains(UserId) && MessageSTR.startsWith("/start-th") &&  switcher.isAlive()){
             this.switcher.unpause();
-        }else if(ProUserID.contains(UserId) && event.getMessage().getContentDisplay().startsWith("/stop-th") && switcher.isAlive()){
+        }else if(ProUserID.contains(UserId) && MessageSTR.startsWith("/stop-th") && switcher.isAlive()){
             this.switcher.pause();
+        }else if(ProUserID.contains(UserId) && MessageSTR.startsWith("/red")){
+            event.getJDA().getRoleById("774678337964343296").getManager().setColor(Color.RED).queue();
+        }else if(ProUserID.contains(UserId) && MessageSTR.startsWith("/ye")){
+            event.getJDA().getRoleById("774678337964343296").getManager().setColor(Color.YELLOW).queue();
+        }else if( ProUserID.contains(UserId) && MessageSTR.startsWith("/get")){
+            event.getChannel().sendMessage(" String"+ this.switcher.getGuildRoleID().size()).queue();
+        }else if(ProUserID.contains(UserId) && MessageSTR.startsWith("/add")){
+            this.switcher.add(event.getJDA().getRoleById("774678337964343296").getManager());
         }
 
     }
+
 }

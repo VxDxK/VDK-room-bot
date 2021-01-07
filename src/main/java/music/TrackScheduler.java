@@ -9,7 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TrackScheduler extends AudioEventAdapter {
     private final AudioPlayer player;
-    private final BlockingQueue<AudioTrack> queue;
+    private BlockingQueue<AudioTrack> queue;
 
     public TrackScheduler(AudioPlayer player){
         this.player = player;
@@ -24,7 +24,9 @@ public class TrackScheduler extends AudioEventAdapter {
         if(queue.peek() != null){
             player.startTrack(queue.peek(), false);
         }else{
-            player.stopTrack();
+            //player.stopTrack();
+            queue = new LinkedBlockingQueue<>(queue);
+            player.startTrack(queue.peek(), false);
         }
     }
 

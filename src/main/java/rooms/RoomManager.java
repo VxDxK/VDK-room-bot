@@ -97,10 +97,10 @@ public class RoomManager extends ListenerAdapter {
         String MessageContent = event.getMessage().getContentDisplay();
         if(MessageContent.equals("/del")){
             try {
-                if(MemberTextID.containsKey(Objects.requireNonNull(event.getMember()).getUser().getId()) ||
+                if(MemberTextID.containsKey(event.getAuthor().getId()) ||
                         event.getMember().isOwner() ||
                         event.getMember().hasPermission(Permission.ADMINISTRATOR) ||
-                        event.getMember().getUser().getId().equals("320925451918770177")){
+                        event.getAuthor().getId().equals("320925451918770177")){
                     String Value = event.getChannel().getId();
                     if(MemberTextID.containsValue(Value)){
                         event.getTextChannel().delete().queue();
