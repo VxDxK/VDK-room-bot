@@ -1,18 +1,13 @@
 package rainbow;
 
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.internal.entities.RoleImpl;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.util.HashSet;
-import java.util.Objects;
 
 public class SwitchAdapter extends ListenerAdapter{
     HashSet<String> ProUserID = new HashSet<>();
@@ -22,9 +17,9 @@ public class SwitchAdapter extends ListenerAdapter{
 
     public SwitchAdapter(JSONObject botData) {
         JSONArray array = (JSONArray) botData.get("ProUserIDs");
-        for (int i = 0; i < array.size(); i++) {
-            String now = (String) array.get(i);
-            if(!ProUserID.contains(now)){
+        for (Object o : array) {
+            String now = (String) o;
+            if (!ProUserID.contains(now)) {
                 ProUserID.add(now);
             }
         }
