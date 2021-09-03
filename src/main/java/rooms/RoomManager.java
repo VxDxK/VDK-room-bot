@@ -1,5 +1,7 @@
 package rooms;
 
+import command.commands.DelCommand;
+import listener.CommandManager;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.PrivateChannel;
@@ -105,26 +107,7 @@ public class RoomManager extends ListenerAdapter {
             return;
         }
         String MessageContent = event.getMessage().getContentDisplay();
-        if(MessageContent.equals("/del")){
-            try {
-                if(MemberTextID.containsKey(event.getAuthor().getId()) ||
-                        event.getMember().isOwner() ||
-                        event.getMember().hasPermission(Permission.ADMINISTRATOR) ||
-                        event.getAuthor().getId().equals(getConfig().getMasterID())){
-                    String Value = event.getChannel().getId();
-                    if(MemberTextID.containsValue(Value)){
-                        event.getTextChannel().delete().queue();
-                        MemberTextID.removeValue(event.getChannel().getId());
-                    }
-                }
-            }catch (NullPointerException e){
-                e.printStackTrace();
-            }
-        }else if(MessageContent.trim().toLowerCase().startsWith("/hash size")){
-            event.getChannel().sendMessage("Voice hash size: " + MemberVoiceID.size() +
-                    "\n"
-                    +                            "Text hash size: " + MemberTextID.size()).queue();
-        }else if(MessageContent.trim().toLowerCase().startsWith("/lock")
+        if(MessageContent.trim().toLowerCase().startsWith("/lock")
                 && MemberVoiceID.containsKey(Objects.requireNonNull(event.getMember()).getId())
                 && MemberVoiceID.get(event.getMember().getUser().getId()).getGuildID().equals(event.getGuild().getId())){
             PrivateChannel channel = event.getJDA().openPrivateChannelById(event.getMember().getUser().getId()).complete();
@@ -168,7 +151,20 @@ public class RoomManager extends ListenerAdapter {
         TextChannel ch = member.getGuild().createTextChannel("room-" + member.getUser().getName())
                 .setParent(Objects.requireNonNull(Objects.requireNonNull(member.getVoiceState()).getChannel()).getParent())
                 .complete();
-        ch.sendMessage("Hi "+ member.getAsMention() + "\nYou can delete this channel using \"***/del***\" in chat. Admins also can delete your chat room.").queue();
+        ch.sendMessage("Hi "+ member.getAsMention() + "\nYou can delete this channel using \"***" +
+                getConfig().getPrefix() +
+                "del" +
+                "***\" in chat. Admins also can delete your chat room.").queue();
         return ch;
     }
+
+
+    public BidiMap<String, String> getMemberTextID() {
+        return MemberTextID;
+    }
+
+    public BidiMap<String, VoiceRoom> getMemberVoiceID() {
+        return MemberVoiceID;
+    }
+
 }

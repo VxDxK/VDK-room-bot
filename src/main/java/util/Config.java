@@ -11,14 +11,17 @@ public class Config {
     private String masterID;
     private String textRoomID;
     private String voiceRoomID;
+    private String prefix;
+    //./config.properties
     private Config(){
-        try(FileInputStream fileInputStream = new FileInputStream("./config.properties")){
+        try(FileInputStream fileInputStream = new FileInputStream("src/main/resources/config.properties")){
             Properties property = new Properties();
             property.load(fileInputStream);
             token = property.getProperty("token");
             masterID = property.getProperty("masterID");
             textRoomID = property.getProperty("textRoomID");
             voiceRoomID = property.getProperty("voiceRoomID");
+            prefix = property.getProperty("prefix");
         }catch (FileNotFoundException e){
             System.out.println("Config file loading failed");
             e.printStackTrace();
@@ -51,5 +54,9 @@ public class Config {
 
     public String getVoiceRoomID() {
         return voiceRoomID;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 }
