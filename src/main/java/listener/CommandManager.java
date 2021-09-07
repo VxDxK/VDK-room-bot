@@ -2,8 +2,10 @@ package listener;
 
 import command.CommandContext;
 import command.ICommand;
+import command.commands.ClearCommand;
 import command.commands.DelCommand;
 import command.commands.HashCommand;
+import command.commands.HelpCommand;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import rooms.RoomManager;
 
@@ -30,6 +32,8 @@ public class CommandManager {
     private CommandManager(){
         commands.add(new DelCommand());
         commands.add(new HashCommand());
+        commands.add(new ClearCommand());
+        commands.add(new HelpCommand());
     }
 
     public ArrayList<ICommand> getCommands() {

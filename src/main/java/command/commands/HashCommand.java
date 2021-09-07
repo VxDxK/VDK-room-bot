@@ -37,7 +37,7 @@ public class HashCommand implements ICommand {
 
     @Override
     public String getHelp() {
-        return null;
+        return "Returns sizes of room maps";
     }
 
     @Override

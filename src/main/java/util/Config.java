@@ -6,22 +6,18 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class Config {
+    private static final String testConfg = "src/main/resources/config.properties";
+    private static final String deployConfg = "./config.properties";
+
     private static volatile Config instance;
     private String token;
     private String masterID;
     private String textRoomID;
     private String voiceRoomID;
     private String prefix;
-    //./config.properties
     private Config(){
-        try(FileInputStream fileInputStream = new FileInputStream("src/main/resources/config.properties")){
-            Properties property = new Properties();
-            property.load(fileInputStream);
-            token = property.getProperty("token");
-            masterID = property.getProperty("masterID");
-            textRoomID = property.getProperty("textRoomID");
-            voiceRoomID = property.getProperty("voiceRoomID");
-            prefix = property.getProperty("prefix");
+        try(FileInputStream fileInputStream = new FileInputStream(deployConfg)){
+            readFile(fileInputStream);
         }catch (FileNotFoundException e){
             System.out.println("Config file loading failed");
             e.printStackTrace();
@@ -29,6 +25,17 @@ public class Config {
             e.printStackTrace();
         }
     }
+
+    private void readFile(FileInputStream file) throws IOException {
+        Properties property = new Properties();
+        property.load(file);
+        token = property.getProperty("token");
+        masterID = property.getProperty("masterID");
+        textRoomID = property.getProperty("textRoomID");
+        voiceRoomID = property.getProperty("voiceRoomID");
+        prefix = property.getProperty("prefix");
+    }
+
     public static Config getConfig(){
         if(instance == null){
             synchronized (Config.class){
