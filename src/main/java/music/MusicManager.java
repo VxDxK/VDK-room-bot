@@ -23,7 +23,7 @@ public class MusicManager extends ListenerAdapter {
     private final AudioPlayerManager playerManager;
     private final Map<String, GuildMusicManager> musicManagers = new HashMap<>(); //Guild id and GuildMusicManager
 
-    private final String COMMAND_PREFIX = "/";
+    private final String COMMAND_PREFIX = "RB";
 
 
     public MusicManager() {
