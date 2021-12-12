@@ -6,7 +6,13 @@
 
     <groupId>org.vdk</groupId>
     <artifactId>NewRoomBot</artifactId>
-    <version>1.4</version>
+    <version>1.5-SNAPSHOT</version>
+
+    <properties>
+        <slf4j.version>1.7.32</slf4j.version>
+        <java.version>1.8</java.version>
+        <jda.version>5.0.0-alpha.2</jda.version>
+    </properties>
 
     <build>
         <plugins>
@@ -16,17 +22,20 @@
                 <version>2.6</version>
                 <executions>
                     <execution>
-                        <id>copy-config-file</id>
+                        <id>copy-files</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${build.directory}</outputDirectory>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>src/main/resources</directory>
-                                    <filtering>true</filtering>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>config.properties</include>
+                                        <include>roombot.db</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>
@@ -38,8 +47,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.6.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -111,10 +120,22 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model</artifactId>
-            <version>3.3.9</version>
+            <version>3.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.36.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
     </dependencies>
-
-
-
 </project>

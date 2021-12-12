@@ -1,69 +1,85 @@
 package listener;
 
+import command.Command;
 import command.CommandContext;
-import command.ICommand;
-import command.commands.ClearCommand;
-import command.commands.DelCommand;
-import command.commands.HashCommand;
-import command.commands.HelpCommand;
+import command.commands.admin.StopCommand;
+import command.commands.guild.*;
+import command.commands.user.GetGuildsCommand;
+import command.commands.user.HashCommand;
+import command.commands.user.HelpCommand;
+import command.commands.user.MuteCommand;
+import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import rooms.RoomManager;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
+import java.util.*;
 import static util.Config.getConfig;
 
+
 public class CommandManager {
-    private static volatile CommandManager manager;
-    private ArrayList<ICommand> commands = new ArrayList<>();
+    private final Map<String, Command<GuildMessageReceivedEvent>> guildCommands = new HashMap<>();
+    private final Map<String, Command<PrivateMessageReceivedEvent>> userCommands = new HashMap<>();
+    private final StringBuilder docBuilder = new StringBuilder();
+    private final List<Command> commands = new ArrayList<>();
+    private final List<Command<GuildMessageReceivedEvent>> listGuildCommands = new ArrayList<>();
+    private final List<Command<PrivateMessageReceivedEvent>> listUserCommands = new ArrayList<>();
 
-    public static CommandManager getInstance(){
-        if(manager == null){
-            synchronized (RoomManager.class){
-                if(manager == null){
-                    manager = new CommandManager();
-                }
-            }
+
+    public CommandManager(){
+        addGuildCommand(new ClearCommand());
+        addGuildCommand(new DelCommand());
+        addGuildCommand(new GuildHashCommand());
+        addGuildCommand(new GuildHelpCommand(this));
+        addGuildCommand(new SetupCommand());
+
+        addUserCommand(new HashCommand());
+        addUserCommand(new HelpCommand(this));
+        addUserCommand(new MuteCommand());
+        addUserCommand(new GetGuildsCommand());
+        addUserCommand(new StopCommand());
+    }
+
+    private void addGuildCommand(Command<GuildMessageReceivedEvent> command){
+        commands.add(command);
+        docBuilder.append(command.getHelp());
+        for (String alias: command.getAliases()) {
+            guildCommands.put(alias, command);
         }
-        return manager;
     }
 
-    private CommandManager(){
-        commands.add(new DelCommand());
-        commands.add(new HashCommand());
-        commands.add(new ClearCommand());
-        commands.add(new HelpCommand());
-    }
-
-    public ArrayList<ICommand> getCommands() {
-        return commands;
-    }
-
-    public ICommand searchCommand(String commandName){
-
-        for(ICommand comm : commands){
-            if(comm.getAliases().contains(commandName.toLowerCase())){
-                return comm;
-            }
+    private void addUserCommand(Command<PrivateMessageReceivedEvent> command){
+        commands.add(command);
+        docBuilder.append(command.getHelp());
+        for (String alias: command.getAliases()) {
+            userCommands.put(alias, command);
         }
-        return null;
     }
 
     public void handle(GuildMessageReceivedEvent event){
-        String prefix = getConfig().getPrefix();
-        String[] parsed = event.getMessage().getContentDisplay().split(" ");
-        String commandName = parsed[0].substring(getConfig().getPrefix().length());
+        handle(event, guildCommands, event.getMessage().getContentDisplay().split(" "));
+    }
+
+    public void handle(PrivateMessageReceivedEvent event){
+        handle(event, userCommands, event.getMessage().getContentDisplay().split(" "));
+    }
+
+    private <E extends Event> void handle(E event, Map<String, Command<E>> commands, String[] messageContent){
+        String commandName = messageContent[0].substring(getConfig().getPrefix().length());
         if(commandName.equals("")){
             return;
         }
-        ICommand command = searchCommand(commandName);
+        Command<E> command = commands.get(commandName);
         if(command != null){
-            CommandContext context = new CommandContext(event, Arrays.asList(parsed)
-                    .subList(1, parsed.length));
+            CommandContext<E> context = new CommandContext<>(event, Arrays.asList(messageContent).subList(1, messageContent.length));
             command.handle(context);
         }
-
     }
 
+    public List<Command> getCommands(){
+        return commands;
+    }
+
+    public String getDocs(){
+        return docBuilder.toString();
+    }
 }

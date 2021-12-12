@@ -1,5 +1,6 @@
 /.idea/
 ./Procfile
+roombot.db
 *.jar
 *.war
 *.nar
@@ -21,5 +22,6 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 /target/maven-archiver/pom.properties
-/src/main/resources/config.properties
+config.properties
+
 

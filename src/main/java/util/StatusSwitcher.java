@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 import java.util.TimerTask;
 
+@Deprecated
 public class StatusSwitcher extends TimerTask {
     private JDA jda;
     private boolean position = false;

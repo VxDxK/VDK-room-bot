@@ -1,8 +1,5 @@
 package rooms;
 
-import command.commands.DelCommand;
-import listener.CommandManager;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -42,13 +39,13 @@ public class RoomManager extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceJoin(@NotNull GuildVoiceJoinEvent event) {
-        if(event.getChannelJoined().getName().equalsIgnoreCase(getConfig().getVoiceRoomID()) ) {
+        if(event.getChannelJoined().getName().equalsIgnoreCase(getConfig().getVoiceRoomButtonName()) ) {
             if (MemberVoiceID.containsKey(event.getMember().getUser().getId())) {
                 event.getGuild().moveVoiceMember(event.getMember(), event.getGuild().getVoiceChannelById(MemberVoiceID.get(event.getMember().getUser().getId()).getVoiceChannelID())).queue();
             } else{
                 MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId(), true));
             }
-        }else if(event.getChannelJoined().getName().equalsIgnoreCase(getConfig().getTextRoomID())){
+        }else if(event.getChannelJoined().getName().equalsIgnoreCase(getConfig().getTextRoomButtonName())){
             if (!MemberTextID.containsKey(event.getMember().getUser().getId())){
                 MemberTextID.put(event.getMember().getUser().getId(), createTextChannel(event.getMember()).getId());
             }
@@ -76,12 +73,12 @@ public class RoomManager extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceMove(@NotNull GuildVoiceMoveEvent event) {
-        if(event.getChannelJoined().getName().equalsIgnoreCase(getConfig().getTextRoomID())){
+        if(event.getChannelJoined().getName().equalsIgnoreCase(getConfig().getTextRoomButtonName())){
             if(!MemberTextID.containsKey(event.getMember().getUser().getId())){
                 MemberTextID.put(event.getMember().getUser().getId(), createTextChannel(event.getMember()).getId());
             }
             event.getGuild().moveVoiceMember(event.getMember(), event.getChannelLeft()).queue();
-        }else if(event.getChannelJoined().getName().equalsIgnoreCase(getConfig().getVoiceRoomID())){
+        }else if(event.getChannelJoined().getName().equalsIgnoreCase(getConfig().getVoiceRoomButtonName())){
             if(!MemberVoiceID.containsKey(event.getMember().getUser().getId())){
                 MemberVoiceID.put(event.getMember().getUser().getId(), new VoiceRoom(event.getGuild().getId(), createVoiceChannel(event.getMember()).getId(), true));
             }else {

@@ -6,17 +6,16 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class Config {
-    private static final String testConfg = "src/main/resources/config.properties";
-    private static final String deployConfg = "./config.properties";
+    private static final String CONFIG_PROPERTIES = "config.properties";
 
     private static volatile Config instance;
     private String token;
     private String masterID;
-    private String textRoomID;
-    private String voiceRoomID;
+    private String textRoomButtonName;
+    private String voiceRoomButtonName;
     private String prefix;
     private Config(){
-        try(FileInputStream fileInputStream = new FileInputStream(deployConfg)){
+        try(FileInputStream fileInputStream = new FileInputStream(CONFIG_PROPERTIES)){
             readFile(fileInputStream);
         }catch (FileNotFoundException e){
             System.out.println("Config file loading failed");
@@ -31,8 +30,8 @@ public class Config {
         property.load(file);
         token = property.getProperty("token");
         masterID = property.getProperty("masterID");
-        textRoomID = property.getProperty("textRoomID");
-        voiceRoomID = property.getProperty("voiceRoomID");
+        textRoomButtonName = property.getProperty("textRoomButtonName");
+        voiceRoomButtonName = property.getProperty("voiceRoomButtonName");
         prefix = property.getProperty("prefix");
     }
 
@@ -55,12 +54,12 @@ public class Config {
         return masterID;
     }
 
-    public String getTextRoomID() {
-        return textRoomID;
+    public String getTextRoomButtonName() {
+        return textRoomButtonName;
     }
 
-    public String getVoiceRoomID() {
-        return voiceRoomID;
+    public String getVoiceRoomButtonName() {
+        return voiceRoomButtonName;
     }
 
     public String getPrefix() {
